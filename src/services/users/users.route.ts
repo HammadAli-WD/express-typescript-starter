@@ -1,30 +1,47 @@
 import { Router } from "express";
 
+import passport from "@utils/passport/passport";
+
+import tokenHandler from "@middlewares/TokenHandler/TokenHandler";
+
+import Users from "./users.schema";
+
+import ApiError from "@classes/ApiError/ApiError";
+
 const router = Router();
 
-router.get("/", async (_req, _res, _next) => {
-  try {
-  } catch (e) {}
-});
+router.post("/register", passport.authenticate("auth.register"), tokenHandler);
 
-router.get("/:id", async (_req, _res, _next) => {
-  try {
-  } catch (e) {}
-});
+router.post("/login", passport.authenticate("auth.login"), tokenHandler);
 
-router.post("/", async (_req, _res, _next) => {
-  try {
-  } catch (e) {}
-});
+router.get("/me", passport.authenticate("auth.jwt"), tokenHandler);
 
-router.put("/:id", async (_req, _res, _next) => {
-  try {
-  } catch (e) {}
-});
+router.get("/:id", passport.authenticate("scope.me"), tokenHandler);
 
-router.delete("/:id", async (_req, _res, _next) => {
-  try {
-  } catch (e) {}
-});
+router.put(
+  "/:id",
+  passport.authenticate("scope.me"),
+  async (req, res, next) => {
+    try {
+      const user = await Users.findByIdAndUpdate(req.params.id, req.body);
+      res.send(user);
+    } catch (e) {
+      next(new ApiError(500, "Update profile is not successfull", false));
+    }
+  }
+);
+
+router.delete(
+  "/:id",
+  passport.authenticate("scope.me"),
+  async (req, res, next) => {
+    try {
+      const user = await Users.findByIdAndDelete(req.params.id);
+      res.send(user);
+    } catch (e) {
+      next(new ApiError(500, "Delete profile is not successfull", false));
+    }
+  }
+);
 
 export default router;

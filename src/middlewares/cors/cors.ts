@@ -12,7 +12,7 @@ const corsOptions = {
       callback(null, true)
     } else {
       // Not allowed
-      callback(new ApiError(401,`Your access to this API is blocked by Cors.`,true))
+      callback(new ApiError(401,`Your access has been blocked by CORS.`,false))
     }
   },
 }

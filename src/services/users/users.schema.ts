@@ -1,7 +1,25 @@
-import {model,Schema} from "mongoose"
+import bcrypt from "bcrypt";
 
-import {IUsers} from "./users"
+import { model, Schema } from "mongoose";
 
-const schema : Schema = new Schema({},{timestamps:true})
+import { IUsers } from "./users";
 
-export default model<IUsers>('Users',schema)
+const schema: Schema = new Schema(
+  {
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+  },
+  { timestamps: true }
+);
+
+schema.pre<IUsers>("save", async function (next) {
+  try {
+    this.password = await bcrypt.hash(this.password, 8);
+
+    next();
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+export default model<IUsers>("Users", schema);
